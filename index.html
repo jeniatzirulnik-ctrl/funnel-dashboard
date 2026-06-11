@@ -6,341 +6,565 @@
 <title>Google Ads Funnel Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; font-size: 14px; }
-  .page { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
-  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-  .topbar-title { font-size: 18px; font-weight: 600; color: #111; display: flex; align-items: center; gap: 8px; }
-  .topbar-right { display: flex; align-items: center; gap: 8px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; display: inline-block; transition: background 0.3s; }
-  .status-txt { font-size: 12px; color: #666; }
-  .refresh-btn { font-size: 12px; padding: 6px 14px; border: 1px solid #ddd; border-radius: 6px; background: #fff; color: #333; cursor: pointer; }
-  .refresh-btn:hover { background: #f0f0f0; }
-  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 12px 16px; margin-bottom: 18px; }
-  .tlabel { font-size: 11px; color: #888; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
-  .toolbar select, .toolbar input[type=date] { font-size: 13px; padding: 5px 10px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa; color: #111; }
-  .sep { width: 1px; height: 24px; background: #e5e5e5; }
-  .view-tabs { display: flex; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; }
-  .view-tab { font-size: 12px; padding: 5px 12px; border: none; background: transparent; color: #666; cursor: pointer; font-weight: 500; }
-  .view-tab.active { background: #3b82f6; color: #fff; }
-  .view-tab:hover:not(.active) { background: #f0f0f0; }
-  .wk-toggle { display: flex; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; }
-  .wk-btn { font-size: 12px; padding: 5px 10px; border: none; background: transparent; color: #666; cursor: pointer; }
-  .wk-btn.active { background: #3b82f6; color: #fff; }
-  .metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 18px; }
-  .metric { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 16px; }
-  .mlabel { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
-  .mval { font-size: 26px; font-weight: 700; color: #111; line-height: 1.1; }
-  .mval.sm { font-size: 15px; font-weight: 600; line-height: 1.4; color: #e24b4a; }
-  .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; padding: 18px 20px; margin-bottom: 16px; }
-  .card-title { font-size: 14px; font-weight: 600; color: #111; margin-bottom: 14px; }
-  .funnel-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .funnel-table th { font-size: 11px; font-weight: 600; color: #888; padding: 6px 8px; text-align: left; border-bottom: 1px solid #eee; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.03em; }
-  .funnel-table td { padding: 8px 8px; border-bottom: 1px solid #f0f0f0; color: #111; white-space: nowrap; vertical-align: middle; }
-  .funnel-table tr:last-child td { border-bottom: none; }
-  .funnel-table tbody tr:hover td { background: #fafafa; }
-  .bar-bg { background: #f0f0f0; border-radius: 4px; height: 7px; width: 100px; overflow: hidden; display: inline-block; vertical-align: middle; }
-  .bar-fill { height: 7px; border-radius: 4px; }
-  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 10px; }
-  .b-red { background: #fee2e2; color: #b91c1c; }
-  .b-amber { background: #fef3c7; color: #92400e; }
-  .b-green { background: #dcfce7; color: #166534; }
-  .b-blue { background: #dbeafe; color: #1d4ed8; }
-  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
-  .leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #555; }
-  .leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
-  .err-box { background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; padding: 14px 16px; font-size: 13px; color: #b91c1c; margin-bottom: 16px; line-height: 1.8; }
-  .debug-box { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 14px 16px; font-size: 12px; color: #0369a1; margin-bottom: 16px; font-family: monospace; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;font-size:14px;}
+.page{max-width:1100px;margin:0 auto;padding:20px 16px;}
+.topbar{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:14px 16px;margin-bottom:14px;}
+.topbar-title{font-size:16px;font-weight:600;color:#111;display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.live{font-size:10px;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#166534;font-weight:600;}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.row:last-of-type{margin-bottom:0;}
+.lbl{font-size:11px;color:#888;white-space:nowrap;font-weight:500;}
+.tabs{display:flex;border:1px solid #e0e0e0;border-radius:7px;overflow:hidden;}
+.tab{font-size:11px;padding:5px 11px;border:none;background:transparent;color:#666;cursor:pointer;white-space:nowrap;border-right:1px solid #e0e0e0;}
+.tab:last-child{border-right:none;}
+.tab.on{background:#3b82f6;color:#fff;font-weight:600;}
+.tab:hover:not(.on){background:#f5f5f5;}
+input[type=date]{font-size:11px;padding:5px 9px;border:1px solid #e0e0e0;border-radius:7px;background:#fafafa;color:#111;}
+.rbtn{font-size:11px;padding:5px 12px;border:1px solid #e0e0e0;border-radius:7px;background:#fff;color:#333;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.rbtn:hover{background:#f5f5f5;}
+.range-lbl{font-size:11px;color:#888;margin-top:8px;}
+.sep{width:1px;height:22px;background:#e5e5e5;}
+.camp-wrap{position:relative;}
+.camp-trigger{font-size:11px;padding:5px 10px;border:1px solid #e0e0e0;border-radius:7px;background:#fafafa;color:#111;cursor:pointer;display:flex;align-items:center;gap:6px;min-width:170px;max-width:260px;user-select:none;}
+.camp-trigger:hover{background:#f0f0f0;}
+.camp-trigger-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.camp-dropdown{position:absolute;top:calc(100% + 4px);left:0;min-width:300px;background:#fff;border:1px solid #e0e0e0;border-radius:10px;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,0.1);display:none;}
+.camp-dropdown.open{display:block;}
+.camp-search{padding:8px 10px;border-bottom:1px solid #f0f0f0;}
+.camp-search input{width:100%;font-size:11px;padding:5px 9px;border:1px solid #e0e0e0;border-radius:6px;background:#fafafa;outline:none;}
+.camp-actions{display:flex;border-bottom:1px solid #f0f0f0;}
+.camp-act-btn{flex:1;font-size:10px;padding:6px;border:none;background:transparent;color:#666;cursor:pointer;font-weight:600;}
+.camp-act-btn:hover{background:#f5f5f5;color:#111;}
+.camp-act-btn:first-child{border-right:1px solid #f0f0f0;}
+.camp-list{max-height:220px;overflow-y:auto;}
+.camp-item{display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;font-size:12px;color:#111;}
+.camp-item:hover{background:#f5f5f5;}
+.camp-check{width:15px;height:15px;border:1.5px solid #ccc;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#fff;}
+.camp-check.checked{background:#3b82f6;border-color:#3b82f6;}
+.camp-check.checked::after{content:'✓';font-size:9px;color:#fff;font-weight:700;}
+.camp-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.camp-footer{padding:8px 12px;border-top:1px solid #f0f0f0;display:flex;justify-content:flex-end;}
+.apply-btn{font-size:11px;padding:5px 16px;border:none;border-radius:7px;background:#3b82f6;color:#fff;cursor:pointer;font-weight:600;}
+.apply-btn:hover{background:#2563eb;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px;}
+.kpi{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px 16px;}
+.klbl{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;font-weight:600;}
+.kval{font-size:24px;font-weight:700;color:#111;line-height:1.1;}
+.kval.alert{font-size:13px;font-weight:600;color:#b91c1c;line-height:1.5;}
+.kdelta{font-size:11px;margin-top:4px;}
+.up{color:#16a34a;} .dn{color:#dc2626;}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:16px 18px;margin-bottom:12px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+.ctitle{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.07em;}
+.funnel-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.funnel-row:last-child{margin-bottom:0;}
+.fn-label{font-size:11px;color:#666;width:90px;flex-shrink:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fn-bar-wrap{flex:1;height:28px;}
+.fn-bar{height:28px;border-radius:5px;display:flex;align-items:center;padding:0 10px;min-width:40px;}
+.fn-val{font-size:11px;font-weight:700;color:#fff;white-space:nowrap;}
+.fn-pct{font-size:11px;color:#888;width:42px;flex-shrink:0;text-align:right;}
+.fn-drop{width:58px;flex-shrink:0;text-align:right;}
+.fn-vs{width:54px;flex-shrink:0;text-align:right;font-size:10px;}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;}
+.bred{background:#fee2e2;color:#b91c1c;}
+.bamb{background:#fef3c7;color:#92400e;}
+.bgrn{background:#dcfce7;color:#166534;}
+.step-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.spill{display:flex;align-items:center;gap:5px;font-size:11px;padding:4px 10px;border-radius:10px;cursor:pointer;border:1px solid transparent;transition:opacity 0.15s;user-select:none;}
+.spill.off{opacity:0.3;filter:grayscale(0.6);}
+.spill:hover{opacity:1!important;filter:none!important;}
+.spill-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.spill-lbl{white-space:nowrap;font-weight:600;}
+.qbtn{font-size:10px;padding:3px 9px;border:1px solid #e0e0e0;border-radius:6px;background:#fff;color:#666;cursor:pointer;font-weight:500;}
+.qbtn:hover{background:#f5f5f5;color:#111;}
+.metric-tabs{display:flex;border:1px solid #e0e0e0;border-radius:7px;overflow:hidden;}
+.metric-tab{font-size:10px;padding:4px 10px;border:none;background:transparent;color:#666;cursor:pointer;white-space:nowrap;border-right:1px solid #e0e0e0;font-weight:500;}
+.metric-tab:last-child{border-right:none;}
+.metric-tab.on{background:#111;color:#fff;font-weight:600;}
+.metric-tab:hover:not(.on){background:#f5f5f5;}
+.metric-hint{font-size:10px;color:#aaa;margin-top:4px;}
+.err-box{background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:14px 16px;font-size:13px;color:#b91c1c;margin-bottom:14px;line-height:1.8;display:none;}
 </style>
 </head>
 <body>
 <div class="page">
 
-  <div class="topbar">
-    <div class="topbar-title">📊 Google Ads Funnel Dashboard</div>
-    <div class="topbar-right">
-      <span class="dot" id="dot"></span>
-      <span class="status-txt" id="stxt">Loading…</span>
-      <button class="refresh-btn" onclick="loadAndRender()">↺ Refresh</button>
-    </div>
+<div class="topbar">
+  <div class="topbar-title">
+    📊 Google Ads Funnel Dashboard
+    <span class="live" id="liveDot">● Loading</span>
   </div>
 
-  <div id="errBox" class="err-box" style="display:none;"></div>
-  <div id="debugBox" class="debug-box" style="display:none;"></div>
-
-  <div id="toolbar" class="toolbar" style="display:none;">
-    <span class="tlabel">Campaign</span>
-    <select id="selCamp" onchange="render()"><option value="ALL">All campaigns</option></select>
-    <div class="sep"></div>
-    <span class="tlabel">View</span>
-    <div class="view-tabs">
-      <button class="view-tab active" id="vDay" onclick="setView('day')">Day</button>
-      <button class="view-tab" id="vWeek" onclick="setView('week')">Week</button>
-      <button class="view-tab" id="vMonth" onclick="setView('month')">Month</button>
-    </div>
-    <div id="wkWrap" style="display:none; align-items:center; gap:8px;">
-      <span class="tlabel">Week starts</span>
-      <div class="wk-toggle">
-        <button class="wk-btn active" id="btnSun" onclick="setWS('sun')">Sun</button>
-        <button class="wk-btn" id="btnMon" onclick="setWS('mon')">Mon</button>
+  <div class="row">
+    <span class="lbl">Campaigns</span>
+    <div class="camp-wrap">
+      <div class="camp-trigger" id="campTrigger" onclick="toggleDD()">
+        <span class="camp-trigger-label" id="campTriggerLbl">Loading…</span>
+        <span style="font-size:11px;color:#888;">▾</span>
+      </div>
+      <div class="camp-dropdown" id="campDD">
+        <div class="camp-search"><input type="text" placeholder="Search campaigns…" id="campSearch" oninput="filterCamps()" onclick="event.stopPropagation()"></div>
+        <div class="camp-actions">
+          <button class="camp-act-btn" onclick="selectAllCamps()">Select all</button>
+          <button class="camp-act-btn" onclick="clearAllCamps()">Clear all</button>
+        </div>
+        <div class="camp-list" id="campList"></div>
+        <div class="camp-footer"><button class="apply-btn" onclick="applyDD()">Apply</button></div>
       </div>
     </div>
     <div class="sep"></div>
-    <span class="tlabel">From</span>
-    <input type="date" id="dFrom" onchange="render()">
-    <span class="tlabel">To</span>
-    <input type="date" id="dTo" onchange="render()">
-  </div>
-
-  <div id="metricsRow" class="metrics-row" style="display:none;"></div>
-
-  <div id="funnelCard" class="card" style="display:none;">
-    <div class="card-title">Funnel drop-off — step by step</div>
-    <div style="overflow-x:auto;">
-      <table class="funnel-table">
-        <thead><tr>
-          <th>#</th><th>Step</th>
-          <th style="text-align:right;">Volume</th>
-          <th>Share of entry</th>
-          <th style="text-align:right;">Drop from prev</th>
-          <th style="text-align:right;">vs prior period</th>
-        </tr></thead>
-        <tbody id="fTbody"></tbody>
-      </table>
+    <span class="lbl">View</span>
+    <div class="tabs">
+      <button class="tab on" onclick="setView('day',this)">Day</button>
+      <button class="tab" onclick="setView('week',this)">Week</button>
+      <button class="tab" onclick="setView('month',this)">Month</button>
+    </div>
+    <div class="tabs" id="wkTabs" style="display:none;">
+      <button class="tab on" onclick="setWS('sun',this)">Sun</button>
+      <button class="tab" onclick="setWS('mon',this)">Mon</button>
     </div>
   </div>
 
-  <div id="trendCard" class="card" style="display:none;">
-    <div class="card-title">Funnel steps over time</div>
-    <div class="legend" id="trendLeg"></div>
-    <div style="position:relative; width:100%; height:300px;">
-      <canvas id="cTrend" role="img" aria-label="Line chart of funnel steps over time"></canvas>
+  <div class="row">
+    <span class="lbl">Period</span>
+    <div class="tabs">
+      <button class="tab" onclick="setPreset('7',this)">Last 7d</button>
+      <button class="tab on" onclick="setPreset('30',this)">Last 30d</button>
+      <button class="tab" onclick="setPreset('lm',this)">Last month</button>
+      <button class="tab" onclick="setPreset('tm',this)">This month</button>
+      <button class="tab" onclick="setPreset('custom',this)">Custom</button>
     </div>
-  </div>
-
-  <div id="campCard" class="card" style="display:none;">
-    <div class="card-title">Purchases by campaign</div>
-    <div style="position:relative; width:100%; height:240px;">
-      <canvas id="cCamp" role="img" aria-label="Bar chart of purchases by campaign"></canvas>
+    <div id="customRange" style="display:none;align-items:center;gap:6px;">
+      <input type="date" id="dFrom" onchange="render()">
+      <span class="lbl">→</span>
+      <input type="date" id="dTo" onchange="render()">
     </div>
+    <div class="sep"></div>
+    <button class="rbtn" onclick="loadAndRender()">↺ Refresh</button>
   </div>
-
+  <div class="range-lbl" id="rangeLbl"></div>
 </div>
 
+<div id="errBox" class="err-box"></div>
+
+<div id="kpis" class="kpis" style="display:none;">
+  <div class="kpi"><div class="klbl">Entry</div><div class="kval" id="kEntry">—</div><div class="kdelta" id="kEntryD"></div></div>
+  <div class="kpi"><div class="klbl">Purchases</div><div class="kval" id="kPur">—</div><div class="kdelta" id="kPurD"></div></div>
+  <div class="kpi"><div class="klbl">Conv. rate</div><div class="kval" id="kRate">—</div><div class="kdelta" id="kRateD"></div></div>
+  <div class="kpi"><div class="klbl">Biggest leak</div><div class="kval alert" id="kLeak">—</div></div>
+</div>
+
+<div id="funnelCard" class="card" style="display:none;">
+  <div class="ctitle" style="margin-bottom:14px;">Funnel — volume &amp; step conversion</div>
+  <div id="funnelRows"></div>
+</div>
+
+<div id="dropCard" class="card" style="display:none;">
+  <div class="ctitle" style="margin-bottom:14px;">Drop-off % at each step &nbsp;<span style="font-size:10px;font-weight:500;color:#bbb;">red &gt;60% · orange &gt;30% · green = healthy</span></div>
+  <div style="position:relative;width:100%;height:200px;">
+    <canvas id="dropC" role="img" aria-label="Drop-off percentage per funnel step"></canvas>
+  </div>
+</div>
+
+<div id="trendCard" class="card" style="display:none;">
+  <div class="card-header">
+    <div class="ctitle">Trend over time</div>
+    <div class="metric-tabs">
+      <button class="metric-tab on" onclick="setMetric('count',this)" title="Raw number of conversions at each step">Count</button>
+      <button class="metric-tab" onclick="setMetric('cvr_entry',this)" title="% of entry (Destinations) who reached each step">CVR from entry</button>
+      <button class="metric-tab" onclick="setMetric('cvr_prev',this)" title="% who passed from the previous step to this one">CVR from prev step</button>
+    </div>
+  </div>
+  <div class="metric-hint" id="metricHint" style="margin-bottom:10px;">Showing raw conversion count per step</div>
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+    <button class="qbtn" onclick="selectAllSteps()">All steps</button>
+    <button class="qbtn" onclick="clearAllSteps()">None</button>
+    <button class="qbtn" onclick="selectKeySteps()">Key steps</button>
+    <span style="font-size:10px;color:#aaa;margin-left:4px;" id="stepCount"></span>
+  </div>
+  <div class="step-pills" id="stepPills"></div>
+  <div style="position:relative;width:100%;height:260px;">
+    <canvas id="trendC" role="img" aria-label="Line chart of funnel steps over time"></canvas>
+  </div>
+</div>
+
+<div id="campCard" class="card" style="display:none;">
+  <div class="ctitle" style="margin-bottom:14px;">Purchases by campaign</div>
+  <div style="position:relative;width:100%;" id="campChartWrap">
+    <canvas id="campC" role="img" aria-label="Horizontal bar chart of purchases by campaign"></canvas>
+  </div>
+</div>
+
+</div>
 <script>
-const PROXY = 'https://script.google.com/macros/s/AKfycbwgvArpF8_QS1G_DBm5BQiRVLC49mEQWTTyaSJLuNFwdLomgtKb5Vy_XZkWgz8gFOdJ/exec';
+const PROXY='https://script.google.com/macros/s/AKfycbwgvArpF8_QS1G_DBm5BQiRVLC49mEQWTTyaSJLuNFwdLomgtKb5Vy_XZkWgz8gFOdJ/exec';
+const STEPS=['View Destinations Page','View Dates Page','View State Page','View Travelers Page','View OB Loader Page','View Offer Page','View Checkout Page','Component Payment card expanded','Purchase'];
+const SHORT=['Destinations','Dates','State','Travelers','OB Loader','Offer','Checkout','Payment','Purchase'];
+const COLORS=['#3b82f6','#10b981','#8b5cf6','#f59e0b','#ec4899','#ef4444','#06b6d4','#14b8a6','#84cc16'];
+const KEY_IDX=new Set([0,4,6,8]);
 
-const STEPS = [
-  'View Destinations Page','View Dates Page','View State Page',
-  'View Travelers Page','View OB Loader Page','View Offer Page',
-  'View Checkout Page','Component Payment card expanded','Purchase'
-];
-const SHORT = ['Destinations','Dates','State','Travelers','OB Loader','Offer','Checkout','Payment','Purchase'];
-const COLORS = ['#3b82f6','#10b981','#8b5cf6','#f59e0b','#ec4899','#ef4444','#06b6d4','#14b8a6','#84cc16'];
+let allRows=[],view='day',ws='sun',preset='30',trendMetric='count';
+let selectedCamps=new Set(),allCamps=[];
+let activeSteps=new Set([0,1,2,3,4,5,6,7,8]);
+let ddOpen=false;
+let dropChart=null,trendChart=null,campChart=null;
+const $=id=>document.getElementById(id);
 
-let allRows=[], view='day', ws='sun', cTrend=null, cCamp=null;
-const $ = id => document.getElementById(id);
-
-function iso(d){ return d.toISOString().slice(0,10).replace(/-/g,''); }
-function fromIso(s){ return new Date(s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8)); }
-function toInput(s){ return s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8); }
-function fromInput(s){ return (s||'').replace(/-/g,''); }
-function fmt(n){ return n >= 10000 ? (n/1000).toFixed(1)+'k' : Math.round(n).toLocaleString(); }
-function fmtPct(v){ if(v===null) return '—'; return (v>=0?'+':'')+v.toFixed(1)+'%'; }
+/* DATE UTILS */
+function parseDate(raw){
+  if(!raw)return null;
+  const s=String(raw).trim().replace(/"/g,'');
+  if(/^\d{8}$/.test(s))return s;
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s.replace(/-/g,'');
+  const d=new Date(s);
+  if(!isNaN(d.getTime()))return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+  return null;
+}
+function iso(d){return d.toISOString().slice(0,10).replace(/-/g,'');}
+function fromIso(s){return new Date(s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8));}
+function toInput(s){return s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8);}
+function fromInput(s){return(s||'').replace(/-/g,'');}
+function fmt(n){return n>=10000?(n/1000).toFixed(1)+'k':Math.round(n).toLocaleString();}
+function fmtPct(v,suffix='%'){if(v===null)return'—';return(v>=0?'↑ +':'↓ ')+Math.abs(v).toFixed(1)+suffix;}
 function weekKey(s){
-  const d=fromIso(s), day=d.getDay(), diff=ws==='sun'?day:(day===0?6:day-1);
-  const m=new Date(d); m.setDate(d.getDate()-diff); return iso(m);
+  const d=fromIso(s),day=d.getDay(),diff=ws==='sun'?day:(day===0?6:day-1);
+  const m=new Date(d);m.setDate(d.getDate()-diff);return iso(m);
+}
+function monthKey(s){return s.slice(0,6);}
+function fmtLabel(k){
+  if(view==='month'){const d=fromIso(k+'01');return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getFullYear();}
+  const d=fromIso(k);return(d.getMonth()+1)+'/'+(d.getDate());
 }
 
+/* RANGES */
+function getRange(p){
+  const today=new Date();let from,to;
+  if(p==='7'){to=new Date(today);from=new Date(today);from.setDate(from.getDate()-6);}
+  else if(p==='30'){to=new Date(today);from=new Date(today);from.setDate(from.getDate()-29);}
+  else if(p==='lm'){from=new Date(today.getFullYear(),today.getMonth()-1,1);to=new Date(today.getFullYear(),today.getMonth(),0);}
+  else if(p==='tm'){from=new Date(today.getFullYear(),today.getMonth(),1);to=new Date(today);}
+  else{from=fromIso(fromInput($('dFrom').value)||iso(new Date()));to=fromIso(fromInput($('dTo').value)||iso(new Date()));}
+  return{from:iso(from),to:iso(to)};
+}
+function getPriorRange(from,to){
+  const fD=fromIso(from),tD=fromIso(to),span=Math.round((tD-fD)/86400000)+1;
+  const pTo=new Date(fD);pTo.setDate(pTo.getDate()-1);
+  const pFrom=new Date(pTo);pFrom.setDate(pTo.getDate()-span+1);
+  return{from:iso(pFrom),to:iso(pTo)};
+}
+function fmtDateDisplay(s){
+  const d=fromIso(s);
+  return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();
+}
+function updateRangeLabel(){
+  const{from,to}=getRange(preset);
+  const{from:pf,to:pt}=getPriorRange(from,to);
+  $('rangeLbl').textContent='Showing: '+fmtDateDisplay(from)+' – '+fmtDateDisplay(to)+' · vs '+fmtDateDisplay(pf)+' – '+fmtDateDisplay(pt);
+}
+
+/* LOAD */
 function parseCSV(text){
-  const rows=[], lines=text.trim().split('\n');
-  for(let i=1; i<lines.length; i++){
-    const parts=[]; let cur='', inQ=false;
-    for(let c=0; c<lines[i].length; c++){
+  const rows=[],lines=text.trim().split('\n');
+  for(let i=1;i<lines.length;i++){
+    const parts=[];let cur='',inQ=false;
+    for(let c=0;c<lines[i].length;c++){
       const ch=lines[i][c];
-      if(ch==='"'){ inQ=!inQ; }
-      else if(ch===','&&!inQ){ parts.push(cur.trim()); cur=''; }
-      else cur+=ch;
+      if(ch==='"'){inQ=!inQ;}else if(ch===','&&!inQ){parts.push(cur);cur='';}else cur+=ch;
     }
-    parts.push(cur.trim());
-    if(parts.length<4) continue;
+    parts.push(cur);
+    if(parts.length<4)continue;
+    const campaign=parts[0].replace(/"/g,'').trim();
     const action=parts[1].replace(/"/g,'').trim();
-    if(!STEPS.includes(action)) continue;
-    const dayRaw=parts[2].replace(/"/g,'').trim().replace(/-/g,'');
-    if(dayRaw.length!==8||isNaN(Number(dayRaw))) continue;
-    rows.push({ campaign:parts[0].replace(/"/g,'').trim(), action, day:dayRaw, val:parseFloat(parts[3])||0 });
+    const day=parseDate(parts[2]);
+    const val=parseFloat(parts[3])||0;
+    if(!STEPS.includes(action)||!day)continue;
+    rows.push({campaign,action,day,val});
   }
   return rows;
 }
 
 async function loadAndRender(){
-  setStatus('loading','Fetching data…');
+  $('liveDot').textContent='● Loading';
   $('errBox').style.display='none';
-  $('debugBox').style.display='none';
-  ['toolbar','metricsRow','funnelCard','trendCard','campCard'].forEach(id=>$(id).style.display='none');
   try{
-    const r = await fetch(PROXY, {redirect: 'follow'});
-    const text = await r.text();
-
-    // Show debug info always so we can see what came back
-    $('debugBox').style.display='block';
-    $('debugBox').textContent = 'HTTP status: ' + r.status + '\nFirst 500 chars:\n' + text.slice(0,500);
-
-    if(!r.ok) throw new Error('HTTP '+r.status+' — see debug info above');
-    if(!text || text.trim().startsWith('<'))
-      throw new Error('Got HTML instead of CSV — script may need re-authorization. See debug box above.');
-
-    allRows = parseCSV(text);
-    if(allRows.length===0){
-      throw new Error('Connected! But 0 rows matched funnel steps. Check debug box above to see raw data.');
-    }
-
-    // Success — hide debug
-    $('debugBox').style.display='none';
-
-    let minD='9999', maxD='0000';
-    allRows.forEach(r=>{ if(r.day<minD)minD=r.day; if(r.day>maxD)maxD=r.day; });
-    const f=$('dFrom'), t=$('dTo');
-    if(!f.value){ const def=new Date(fromIso(maxD)); def.setDate(def.getDate()-29); f.value=toInput(iso(def)); }
-    if(!t.value) t.value=toInput(maxD);
-    const camps=[...new Set(allRows.map(r=>r.campaign))].sort();
-    const sel=$('selCamp');
-    sel.innerHTML='<option value="ALL">All campaigns</option>';
-    camps.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c.length>50?c.slice(0,50)+'…':c; sel.appendChild(o); });
-    $('toolbar').style.display='flex';
-    setStatus('ok', allRows.length.toLocaleString()+' rows · '+camps.length+' campaigns · latest: '+toInput(maxD));
+    const r=await fetch(PROXY,{redirect:'follow'});
+    const text=await r.text();
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    if(!text||text.trim().startsWith('<'))throw new Error('Apps Script returned HTML — check deployment access is set to "Anyone".');
+    allRows=parseCSV(text);
+    if(allRows.length===0)throw new Error('Connected but 0 rows matched. Sample: '+text.slice(0,200));
+    allCamps=[...new Set(allRows.map(r=>r.campaign))].sort();
+    selectedCamps=new Set(allCamps);
+    buildCampList();updateCampTrigger();
+    $('liveDot').textContent='● Live';
+    updateRangeLabel();
     render();
-  } catch(e){
-    setStatus('err','Failed — see error below');
+  }catch(e){
+    $('liveDot').textContent='● Error';
     $('errBox').style.display='block';
     $('errBox').innerHTML='<strong>Error:</strong> '+e.message;
   }
 }
 
-function setStatus(s,msg){
-  $('stxt').textContent=msg;
-  $('dot').style.background = s==='ok'?'#22c55e' : s==='err'?'#ef4444' : '#f59e0b';
-}
-
-function getFiltered(){
-  const from=fromInput($('dFrom').value)||'19700101', to=fromInput($('dTo').value)||'29991231', camp=$('selCamp').value;
-  return allRows.filter(r=>r.day>=from&&r.day<=to&&(camp==='ALL'||r.campaign===camp));
-}
-function getPrior(){
-  const from=fromInput($('dFrom').value)||'19700101', to=fromInput($('dTo').value)||'29991231', camp=$('selCamp').value;
-  const fD=fromIso(from), tD=fromIso(to), span=Math.round((tD-fD)/86400000)+1;
-  const pTo=new Date(fD); pTo.setDate(pTo.getDate()-1);
-  const pFrom=new Date(pTo); pFrom.setDate(pTo.getDate()-span+1);
-  return allRows.filter(r=>r.day>=iso(pFrom)&&r.day<=iso(pTo)&&(camp==='ALL'||r.campaign===camp));
+/* FILTER & AGGREGATE */
+function getFiltered(fromStr,toStr){
+  return allRows.filter(r=>r.day>=fromStr&&r.day<=toStr&&selectedCamps.has(r.campaign));
 }
 function totals(rows){
-  const t={}; STEPS.forEach(s=>t[s]=0);
-  rows.forEach(r=>t[r.action]=(t[r.action]||0)+r.val); return t;
+  const t={};STEPS.forEach(s=>t[s]=0);
+  rows.forEach(r=>t[r.action]=(t[r.action]||0)+r.val);
+  return t;
 }
 function grouped(rows){
-  const kf = view==='day'?r=>r.day : view==='week'?r=>weekKey(r.day) : r=>r.day.slice(0,6);
+  const kf=view==='day'?r=>r.day:view==='week'?r=>weekKey(r.day):r=>monthKey(r.day);
   const g={};
-  rows.forEach(r=>{ const k=kf(r); if(!g[k])g[k]={}; g[k][r.action]=(g[k][r.action]||0)+r.val; });
+  rows.forEach(r=>{const k=kf(r);if(!g[k])g[k]={};g[k][r.action]=(g[k][r.action]||0)+r.val;});
   return g;
 }
+
+/* MAIN RENDER */
 function render(){
-  const rows=getFiltered(), prows=getPrior(), tot=totals(rows), ptot=totals(prows);
-  renderMetrics(tot); renderFunnel(tot,ptot); renderTrend(grouped(rows)); renderCamps(rows);
+  updateRangeLabel();
+  const{from,to}=getRange(preset);
+  const{from:pf,to:pt}=getPriorRange(from,to);
+  const rows=getFiltered(from,to);
+  const prows=getFiltered(pf,pt);
+  const tot=totals(rows);
+  const ptot=totals(prows);
+  const grp=grouped(rows);
+  renderKPIs(tot,ptot);
+  renderFunnel(tot,ptot);
+  renderDrop(tot);
+  renderTrend(grp);
+  renderCamps(rows);
 }
-function renderMetrics(tot){
-  const top=tot[STEPS[0]]||0, pur=tot['Purchase']||0, rate=top>0?pur/top*100:0;
-  $('metricsRow').style.display='grid';
-  $('metricsRow').innerHTML=`
-    <div class="metric"><div class="mlabel">Entry (Destinations)</div><div class="mval">${fmt(top)}</div></div>
-    <div class="metric"><div class="mlabel">Purchases</div><div class="mval">${fmt(pur)}</div></div>
-    <div class="metric"><div class="mlabel">End-to-end rate</div><div class="mval">${rate.toFixed(2)}%</div></div>
-    <div class="metric"><div class="mlabel">Biggest drop step</div><div class="mval sm">${getBigDrop(tot)}</div></div>`;
+
+function renderKPIs(tot,ptot){
+  const top=tot[STEPS[0]]||0,pur=tot['Purchase']||0,rate=top>0?pur/top*100:0;
+  const ptop=ptot[STEPS[0]]||0,ppur=ptot['Purchase']||0,prate=ptop>0?ppur/ptop*100:0;
+  const dTop=ptop>0?(top-ptop)/ptop*100:null;
+  const dPur=ppur>0?(pur-ppur)/ppur*100:null;
+  const dRate=prate>0?rate-prate:null;
+  $('kEntry').textContent=fmt(top);
+  $('kEntryD').innerHTML=dTop!==null?`<span class="${dTop>=0?'up':'dn'}">${fmtPct(dTop)} vs prior</span>`:'';
+  $('kPur').textContent=fmt(pur);
+  $('kPurD').innerHTML=dPur!==null?`<span class="${dPur>=0?'up':'dn'}">${fmtPct(dPur)} vs prior</span>`:'';
+  $('kRate').textContent=rate.toFixed(2)+'%';
+  $('kRateD').innerHTML=dRate!==null?`<span class="${dRate>=0?'up':'dn'}">${dRate>=0?'↑ +':'↓ '}${Math.abs(dRate).toFixed(2)}pp vs prior</span>`:'';
+  $('kLeak').textContent=getBigLeak(tot);
+  $('kpis').style.display='grid';
 }
-function getBigDrop(tot){
-  let maxD=0, step='—';
+function getBigLeak(tot){
+  let maxD=0,step='—';
   for(let i=1;i<STEPS.length;i++){
-    const p=tot[STEPS[i-1]]||0, c=tot[STEPS[i]]||0;
-    if(p>0){ const d=(p-c)/p*100; if(d>maxD){ maxD=d; step=SHORT[i]+' ('+d.toFixed(0)+'%)'; } }
+    const p=tot[STEPS[i-1]]||0,c=tot[STEPS[i]]||0;
+    if(p>0){const d=(p-c)/p*100;if(d>maxD){maxD=d;step=SHORT[i-1]+' → '+SHORT[i]+'\n−'+d.toFixed(0)+'% of users';}}
   }
   return step;
 }
+
 function renderFunnel(tot,ptot){
-  const top=Math.max(tot[STEPS[0]]||0,1), tb=$('fTbody'); tb.innerHTML='';
+  const top=Math.max(tot[STEPS[0]]||0,1);
+  const container=$('funnelRows');container.innerHTML='';
   STEPS.forEach((s,i)=>{
-    const val=tot[s]||0, prev=i>0?(tot[STEPS[i-1]]||0):val;
-    const drop=prev>0&&i>0?(prev-val)/prev*100:null, share=val/top*100;
-    const pval=ptot[s]||0, vp=pval>0?(val-pval)/pval*100:null;
-    let dB='—'; if(drop!==null){ const c=drop>60?'b-red':drop>30?'b-amber':'b-green'; dB=`<span class="badge ${c}">-${drop.toFixed(1)}%</span>`; }
-    let pB='—'; if(vp!==null){ const c=vp>0?'b-green':vp<0?'b-red':'b-blue'; pB=`<span class="badge ${c}">${fmtPct(vp)}</span>`; }
-    tb.innerHTML+=`<tr>
-      <td style="color:#aaa;font-weight:700;font-size:12px;">${i+1}</td>
-      <td>${s}</td>
-      <td style="text-align:right;font-weight:600;">${fmt(val)}</td>
-      <td><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(share,100).toFixed(1)}%;background:${COLORS[i]};"></div></div>
-        <span style="font-size:11px;color:#888;margin-left:6px;">${share.toFixed(1)}%</span></td>
-      <td style="text-align:right;">${dB}</td>
-      <td style="text-align:right;">${pB}</td></tr>`;
+    const val=tot[s]||0,pct=val/top*100;
+    const prev=i>0?(tot[STEPS[i-1]]||0):val;
+    const drop=prev>0&&i>0?(prev-val)/prev*100:null;
+    const pval=ptot[s]||0,vp=pval>0?(val-pval)/pval*100:null;
+    const cls=drop>60?'bred':drop>30?'bamb':'bgrn';
+    const row=document.createElement('div');row.className='funnel-row';
+    row.innerHTML=`
+      <div class="fn-label" title="${s}">${SHORT[i]}</div>
+      <div class="fn-bar-wrap"><div class="fn-bar" style="width:${Math.max(pct,2).toFixed(1)}%;background:${COLORS[i]};opacity:${(0.35+0.65*(pct/100)).toFixed(2)};"><span class="fn-val">${fmt(val)}</span></div></div>
+      <div class="fn-pct">${pct.toFixed(1)}%</div>
+      <div class="fn-drop">${drop!==null?`<span class="badge ${cls}">-${drop.toFixed(0)}%</span>`:'<span style="font-size:10px;color:#aaa">entry</span>'}</div>
+      <div class="fn-vs">${vp!==null?`<span class="${vp>=0?'up':'dn'}">${vp>=0?'+':''}${vp.toFixed(1)}%</span>`:'—'}</div>`;
+    container.appendChild(row);
   });
   $('funnelCard').style.display='block';
 }
+
+function renderDrop(tot){
+  const drops=STEPS.slice(1).map((_,i)=>{
+    const p=tot[STEPS[i]]||0,c=tot[STEPS[i+1]]||0;
+    return p>0?+((p-c)/p*100).toFixed(1):0;
+  });
+  const bgs=drops.map(d=>d>60?'#ef4444':d>30?'#f59e0b':'#22c55e');
+  const ctx=$('dropC').getContext('2d');
+  if(dropChart)dropChart.destroy();
+  dropChart=new Chart(ctx,{type:'bar',
+    data:{labels:SHORT.slice(1),datasets:[{data:drops,backgroundColor:bgs,borderRadius:5,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Lost ${c.raw}% vs previous step`}}},
+      scales:{x:{ticks:{font:{size:10},maxRotation:30},grid:{display:false}},
+        y:{max:100,ticks:{font:{size:10},callback:v=>v+'%'},grid:{color:'rgba(0,0,0,0.04)'},
+          title:{display:true,text:'% lost vs prev step',font:{size:9},color:'#aaa'}}},
+      animation:false}
+  });
+  $('dropCard').style.display='block';
+}
+
+/* TREND with 3 metric modes */
+function getTrendValue(grpPeriod, stepIdx, metric){
+  const val=grpPeriod[STEPS[stepIdx]]||0;
+  if(metric==='count') return val;
+  if(metric==='cvr_entry'){
+    const entry=grpPeriod[STEPS[0]]||0;
+    return entry>0?+((val/entry)*100).toFixed(2):0;
+  }
+  if(metric==='cvr_prev'){
+    if(stepIdx===0){const entry=grpPeriod[STEPS[0]]||0;return entry>0?100:0;}
+    const prev=grpPeriod[STEPS[stepIdx-1]]||0;
+    return prev>0?+((val/prev)*100).toFixed(2):0;
+  }
+  return val;
+}
+
 function renderTrend(grp){
   const keys=Object.keys(grp).sort();
-  const labels=keys.map(k=>{
-    if(view==='month') return k.slice(0,4)+'/'+k.slice(4,6);
-    const d=fromIso(k); return (d.getMonth()+1)+'/'+(d.getDate());
-  });
+  const labels=keys.map(k=>fmtLabel(k));
   const datasets=STEPS.map((s,i)=>({
-    label:SHORT[i], data:keys.map(k=>(grp[k]&&grp[k][s])||0),
-    borderColor:COLORS[i], borderWidth:2, pointRadius:keys.length<=25?3:0,
-    tension:0.3, fill:false, borderDash:i===8?[5,3]:[]
+    label:SHORT[i],
+    data:keys.map(k=>getTrendValue(grp[k]||{},i,trendMetric)),
+    borderColor:COLORS[i],backgroundColor:COLORS[i]+'15',
+    borderWidth:activeSteps.has(i)?2:0,
+    pointRadius:0,pointHoverRadius:activeSteps.has(i)?4:0,
+    tension:0.4,fill:false,hidden:!activeSteps.has(i),
+    borderDash:i===8?[5,3]:[]
   }));
-  $('trendLeg').innerHTML=STEPS.map((s,i)=>`<span class="leg-item"><span class="leg-dot" style="background:${COLORS[i]};"></span>${SHORT[i]}</span>`).join('');
-  const ctx=$('cTrend').getContext('2d');
-  if(cTrend) cTrend.destroy();
-  cTrend=new Chart(ctx,{ type:'line', data:{labels,datasets}, options:{
-    responsive:true, maintainAspectRatio:false,
-    plugins:{ legend:{display:false}, tooltip:{mode:'index',intersect:false,callbacks:{label:c=>SHORT[c.datasetIndex]+': '+fmt(c.raw)}} },
-    scales:{
-      x:{ ticks:{font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:20}, grid:{display:false} },
-      y:{ ticks:{font:{size:10},callback:v=>fmt(v)}, grid:{color:'rgba(0,0,0,0.05)'} }
-    }, animation:false
-  }});
+
+  const yLabel=trendMetric==='count'?'Conversions':trendMetric==='cvr_entry'?'CVR from entry (%)':'CVR from prev step (%)';
+  const yCallback=trendMetric==='count'?v=>fmt(v):v=>v+'%';
+
+  buildStepPills();
+  const ctx=$('trendC').getContext('2d');
+  if(trendChart)trendChart.destroy();
+  trendChart=new Chart(ctx,{
+    type:'line',data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{mode:'index',intersect:false,
+          filter:item=>activeSteps.has(item.datasetIndex),
+          callbacks:{
+            label:c=>{
+              if(!activeSteps.has(c.datasetIndex))return null;
+              const suffix=trendMetric==='count'?'':' %';
+              return`${SHORT[c.datasetIndex]}: ${trendMetric==='count'?fmt(c.raw):c.raw+suffix}`;
+            }
+          }}},
+      scales:{
+        x:{ticks:{font:{size:9},autoSkip:true,maxTicksLimit:18,maxRotation:45},grid:{display:false}},
+        y:{ticks:{font:{size:9},callback:yCallback},grid:{color:'rgba(0,0,0,0.04)'},
+          title:{display:true,text:yLabel,font:{size:9},color:'#aaa'}}
+      },animation:false}
+  });
   $('trendCard').style.display='block';
 }
+
+function buildStepPills(){
+  const container=$('stepPills');container.innerHTML='';
+  SHORT.forEach((s,i)=>{
+    const pill=document.createElement('div');
+    pill.className='spill'+(activeSteps.has(i)?'':' off');
+    pill.id='pill-'+i;
+    pill.style.background=COLORS[i]+'18';
+    pill.style.borderColor=COLORS[i]+'55';
+    pill.innerHTML=`<span class="spill-dot" style="background:${COLORS[i]};"></span><span class="spill-lbl" style="color:${COLORS[i]};">${s}</span>`;
+    pill.onclick=()=>{
+      if(activeSteps.has(i)){if(activeSteps.size===1)return;activeSteps.delete(i);}
+      else activeSteps.add(i);
+      pill.classList.toggle('off',!activeSteps.has(i));
+      updateTrendChart();updateStepCount();
+    };
+    container.appendChild(pill);
+  });
+  updateStepCount();
+}
+
+function updateTrendChart(){
+  if(!trendChart)return;
+  trendChart.data.datasets.forEach((ds,i)=>{
+    ds.hidden=!activeSteps.has(i);
+    ds.borderWidth=activeSteps.has(i)?2:0;
+    ds.pointHoverRadius=activeSteps.has(i)?4:0;
+  });
+  trendChart.update();
+}
+function updateStepCount(){$('stepCount').textContent=activeSteps.size+' of '+SHORT.length+' steps shown';}
+function selectAllSteps(){activeSteps=new Set(SHORT.map((_,i)=>i));SHORT.forEach((_,i)=>{const p=$('pill-'+i);if(p)p.classList.remove('off');});updateTrendChart();updateStepCount();}
+function clearAllSteps(){activeSteps=new Set([0]);SHORT.forEach((_,i)=>{const p=$('pill-'+i);if(p)p.classList.toggle('off',!activeSteps.has(i));});updateTrendChart();updateStepCount();}
+function selectKeySteps(){activeSteps=new Set(KEY_IDX);SHORT.forEach((_,i)=>{const p=$('pill-'+i);if(p)p.classList.toggle('off',!activeSteps.has(i));});updateTrendChart();updateStepCount();}
+
+function setMetric(m,btn){
+  trendMetric=m;
+  btn.closest('.metric-tabs').querySelectorAll('.metric-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const hints={
+    count:'Showing raw conversion count per step',
+    cvr_entry:'Showing % of entry (Destinations) who reached each step',
+    cvr_prev:'Showing % who passed from the previous step to this one'
+  };
+  $('metricHint').textContent=hints[m];
+  if(allRows.length){
+    const{from,to}=getRange(preset);
+    const rows=getFiltered(from,to);
+    renderTrend(grouped(rows));
+  }
+}
+
 function renderCamps(rows){
   const byC={};
   rows.filter(r=>r.action==='Purchase').forEach(r=>byC[r.campaign]=(byC[r.campaign]||0)+r.val);
-  const entries=Object.entries(byC).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  if(!entries.length){ $('campCard').style.display='none'; return; }
-  const ctx=$('cCamp').getContext('2d');
-  if(cCamp) cCamp.destroy();
-  cCamp=new Chart(ctx,{ type:'bar', data:{
-    labels:entries.map(e=>e[0].length>30?e[0].slice(0,30)+'…':e[0]),
-    datasets:[{ label:'Purchases', data:entries.map(e=>Math.round(e[1])),
-      backgroundColor:entries.map((_,i)=>COLORS[i%COLORS.length]+'cc'), borderRadius:5 }]
-  }, options:{
-    responsive:true, maintainAspectRatio:false,
-    plugins:{ legend:{display:false} },
-    scales:{
-      x:{ ticks:{font:{size:10},maxRotation:40} },
-      y:{ ticks:{font:{size:10},callback:v=>fmt(v)}, grid:{color:'rgba(0,0,0,0.05)'} }
-    }, animation:false
-  }});
+  const entries=Object.entries(byC).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  if(!entries.length){$('campCard').style.display='none';return;}
+  const h=Math.max(entries.length*38+60,160);
+  $('campChartWrap').style.height=h+'px';
+  const ctx=$('campC').getContext('2d');
+  if(campChart)campChart.destroy();
+  campChart=new Chart(ctx,{type:'bar',
+    data:{labels:entries.map(e=>e[0].length>34?e[0].slice(0,34)+'…':e[0]),
+      datasets:[{data:entries.map(e=>Math.round(e[1])),backgroundColor:'#3b82f688',borderRadius:5,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${Math.round(c.raw)} purchases`}}},
+      scales:{x:{ticks:{font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},
+        y:{ticks:{font:{size:10}},grid:{display:false}}},
+      animation:false}
+  });
   $('campCard').style.display='block';
 }
-function setView(v){
-  view=v;
-  ['Day','Week','Month'].forEach(x=>$('v'+x).classList.remove('active'));
-  $('v'+v[0].toUpperCase()+v.slice(1)).classList.add('active');
-  $('wkWrap').style.display=v==='week'?'flex':'none';
-  render();
+
+/* CAMPAIGN DROPDOWN */
+function buildCampList(filter=''){
+  const list=$('campList');list.innerHTML='';
+  allCamps.filter(c=>c.toLowerCase().includes(filter.toLowerCase())).forEach(c=>{
+    const item=document.createElement('div');item.className='camp-item';
+    item.onclick=()=>{
+      if(selectedCamps.has(c))selectedCamps.delete(c);else selectedCamps.add(c);
+      item.querySelector('.camp-check').className='camp-check'+(selectedCamps.has(c)?' checked':'');
+    };
+    item.innerHTML=`<div class="camp-check${selectedCamps.has(c)?' checked':''}"></div><div class="camp-name" title="${c}">${c}</div>`;
+    list.appendChild(item);
+  });
 }
-function setWS(w){
-  ws=w;
-  $('btnSun').classList.toggle('active',w==='sun');
-  $('btnMon').classList.toggle('active',w==='mon');
-  render();
+function filterCamps(){buildCampList($('campSearch').value);}
+function selectAllCamps(){selectedCamps=new Set(allCamps);buildCampList($('campSearch').value);}
+function clearAllCamps(){selectedCamps.clear();buildCampList($('campSearch').value);}
+function toggleDD(){ddOpen=!ddOpen;$('campDD').classList.toggle('open',ddOpen);if(ddOpen)buildCampList();}
+function applyDD(){ddOpen=false;$('campDD').classList.remove('open');updateCampTrigger();render();}
+function updateCampTrigger(){
+  const lbl=$('campTriggerLbl');
+  if(selectedCamps.size===0)lbl.textContent='No campaigns';
+  else if(selectedCamps.size===allCamps.length)lbl.textContent='All campaigns';
+  else if(selectedCamps.size===1)lbl.textContent=[...selectedCamps][0];
+  else lbl.textContent=selectedCamps.size+' campaigns selected';
 }
+document.addEventListener('click',e=>{if(!e.target.closest('.camp-wrap')&&ddOpen){ddOpen=false;$('campDD').classList.remove('open');}});
+
+/* CONTROLS */
+function setView(v,btn){view=v;btn.closest('.tabs').querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');$('wkTabs').style.display=v==='week'?'flex':'none';if(allRows.length)render();}
+function setWS(w,btn){ws=w;btn.closest('.tabs').querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');if(allRows.length)render();}
+function setPreset(p,btn){preset=p;btn.closest('.tabs').querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');$('customRange').style.display=p==='custom'?'flex':'none';updateRangeLabel();if(allRows.length)render();}
 
 loadAndRender();
 </script>
